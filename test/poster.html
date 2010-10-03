@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<title></title>
+	<style>
+		body {
+			font-family: 'Lucida Grande', Verdana, Arial;
+			font-size: 12px;
+		}
+ 
+		#stage {
+			position: relative;
+			margin: 150px auto;
+			width: 600px;
+			height: 400px;
+       		border: 1px solid black;
+		}
+ 
+		#rotate {
+			margin: 0 auto;
+			width: 600px;
+			height: 400px;
+		}
+ 
+		.ring {
+			margin: 0 auto;
+			height: 110px;
+			width: 600px;
+		}
+		
+		.ring > :nth-child(odd) .poster {
+			background-color: #995C7F;
+		}
+ 		.ring > :nth-child(even) .poster {
+			background-color: #835A99;
+		}
+ 
+		.poster {
+			position: absolute;
+			left: 250px;
+			width: 100px;
+			height: 100px;
+			opacity: 0.7;
+			color: rgba(0,0,0,0.9);
+			-webkit-border-radius: 10px;
+			-moz-border-radius: 10px;
+		}
+			
+		.poster p {
+			font-family: 'Georgia', serif;
+			font-size: 36px;
+			font-weight: bold;
+			text-align: center;
+			margin-top: 28px;
+		}
+	</style>
+</head>
+
+<body>
+<h1>Poster Circle</h1> 
+<p>This is a simple example of how to use CSS transformation and animations to get interesting-looking behavior.</p> 
+<p>The three rings are constructed using a simple JavaScript function that creates elements and assigns them a transform
+	that describes their position in the ring. CSS animations are then used to rotate each ring, and to spin the containing
+	element around too.</p> 
+<p>Note that you can still select the numbers on the ring; everything remains clickable.</p> 
+<div id="stage"> 
+	<div id="rotate"> 
+		<div id="ring-1" class="ring">
+			
+		</div> 
+		<div id="ring-2" class="ring">
+			
+		</div> 
+		<div id="ring-3" class="ring">
+			
+		</div> 
+	</div> 
+</div> 
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.js"></script>
+<script src="../lib/jquery.transform.js"></script>
+<script src="../lib/jquery.transform.animate.js"></script>
+<script src="../lib/jquery.angle.js"></script>
+<script src="../lib/jquery.matrix.js"></script>
+<!--<script src="js/jquery.matrix.js"></script>-->
+<script src="../lib/jquery.matrix.calculations.js"></script>
+<script src="../lib/jquery.matrix.functions.js"></script>
+<script src="../lib/jquery.transform3d.js"></script>
+
+<script>
+	var POSTERS_PER_ROW = 12;
+	var RING_RADIUS = 200;
+	function setup_posters ($row) {
+		var posterAngle = 360 / POSTERS_PER_ROW, $poster, $content;
+		var fragment = document.createDocumentFragment();
+		
+		for (var i = 0; i < POSTERS_PER_ROW; i++) {
+			$poster = $('<div class="poster">');
+			
+			// setup the number to show inside the poster
+			$poster.append($('<p>').text(i));
+			
+			// add the poster to the row
+			$row.append($poster);
+			
+			// compute and assign the transform for this poster
+			$poster.transform3d({
+				perspective: 800,
+				rotateY: (posterAngle * i),
+				translateZ: RING_RADIUS
+			}, {
+				quality: 3,
+				nudge: 1.03,
+				perspectiveSelector: '#stage'
+			});
+		}
+	}
+	function init () {
+		setup_posters($('#ring-1'));
+		setup_posters($('#ring-2'));
+		setup_posters($('#ring-3'));
+	}
+ 
+	// call init once the document is fully loaded
+	init();
+	//window.addEventListener('load', init, false);
+	</script>
+</body>
+</html>
