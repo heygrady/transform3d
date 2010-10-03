@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<title></title>
+	<style>
+		body {
+			padding: 50px;
+			
+		}
+		div {
+			margin-bottom: 50px;
+		}
+		img {
+			border: 1px solid salmon;
+		}
+		div img {
+			/*opacity: .8;*/
+		}
+		img.t {
+			-webkit-transform: perspective(400) rotateY(30deg) rotateX(30deg);
+		}
+	</style>
+</head>
+
+<body>
+<img src="http://www.whydidigowrong.co.uk/wp-content/uploads/2007/03/help-my-dogs-as-fat-as-me.jpg" height="292" width="333" />
+<img class="t" src="http://www.whydidigowrong.co.uk/wp-content/uploads/2007/03/help-my-dogs-as-fat-as-me.jpg" height="292" width="333" />
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.js"></script>
+<script src="../lib/jquery.transform.js"></script>
+<script src="../lib/jquery.angle.js"></script>
+<script src="../lib/jquery.matrix.js"></script>
+<!--<script src="js/jquery.matrix.js"></script>-->
+<script src="../lib/jquery.matrix.calculations.js"></script>
+<script src="../lib/jquery.matrix.functions.js"></script>
+<script src="../lib/jquery.transform3d.js"></script>
+<script>	
+	$('img:first').transform3d({perspective: 400, rotateY: '30deg', rotateX: '30deg'}, {quality: 7});
+</script>
+</body>
+</html>

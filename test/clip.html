@@ -1,0 +1,264 @@
+<style>
+	.stage {
+		float: left;
+		margin: 40px;
+		border: 1px solid red;
+	}
+	#real {
+		/*-webkit-perspective: 800;*/
+		position: relative;
+	}
+	#real div {
+		/*position: absolute;*/
+		top: 0;
+		left: 0;
+		-webkit-transform: perspective(400) rotateY(30deg) rotateX(30deg);
+		/*clip: rect(0px 41.875px 36.75px 0px);*/
+	}
+	#real img {
+		border: 1px solid pink;
+	}
+	#fake {
+		position: relative;
+	}
+	#fake img {
+		border: 1px solid pink;
+	}
+	.patch {
+		-background-color: pink;
+	}
+	.patch:nth-child(odd) {
+		-background-color: salmon;
+	}
+	.patch {
+		-opacity: .85;
+		/*border: 1px solid black;*/
+	}
+</style>
+<button id="go">Go!</button>
+<button id="matrix">Matrix!</button> <p></p>
+<div class="stage" id="fake">
+	<div>
+		<img src="http://www.whydidigowrong.co.uk/wp-content/uploads/2007/03/help-my-dogs-as-fat-as-me.jpg" />
+	</div>
+</div>
+<div class="stage" id="real">
+	<div>
+		<img src="http://www.whydidigowrong.co.uk/wp-content/uploads/2007/03/help-my-dogs-as-fat-as-me.jpg" />
+	</div>
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.js"></script>
+<script src="../lib/jquery.angle.js"></script>
+<script src="../lib/jquery.transform.js"></script>
+<script src="js/jquery.matrix.js"></script>
+<script src="js/jquery.matrix.calc.js"></script>
+
+<script>
+	$('#go').click(test);
+	$('#matrix').click(matrix);
+	
+	function matrix() {
+		var $elem = $('p:first'),
+			quality = 5,
+			count = quality * quality,
+			i = 0,
+			row = 0,
+			col = 0,
+			patchX = 256/quality,
+			patchY = 256/quality;
+			
+		var tl, br, tx, ty;
+		
+		do {
+			tx = row * patchX;
+			ty = col * patchY;
+			tl = [
+				tx,
+				ty 
+			];
+			br = [
+				tx + patchX,
+				ty + patchY
+			];
+			i++;
+			if (col % quality == quality - 1) {
+				col = 0;
+				row++;
+			} else {
+				col++;
+			}
+		} while(i < count)
+	}
+	
+	var counter = 0, zMax, zMin;
+	
+	function test() {
+		// capture the original element
+		var $elem = $('#fake div img'),
+			$real = $('#real div'),
+			frag = document.createDocumentFragment(),
+			y = $elem.outerHeight(),
+			x = $elem.outerWidth(),
+			patch = (x / 5) * (y / 5);
+		//var theTransform = window.getComputedStyle($real[0]).webkitTransform;
+		//var matrix = new WebKitCSSMatrix(theTransform);
+		
+		// Create a matrix
+		var	matrix = $.matrix.perspective(400)
+				.x($.matrix.rotateY(30))
+				.x($.matrix.rotateX(30)),
+			calc = new $.matrix.calc(matrix, y, x);
+		
+		// divide the item pre-transform
+		divide([0, 0], [x, 0], [x, y], [0, y]);
+		var offset = $elem.css({visibility: 'hidden'});
+		
+		var $target = $elem.wrap('<div>').parent().css({position: 'relative'});
+		
+		$target.append(frag.cloneNode(true));
+	
+		function divide(tl, tr, br, bl) {
+			var v1 = {
+						x: tr[0] - tl[0] + br[0] - bl[0],
+						y: tr[1] - tl[1] + br[1] - bl[1]
+					},
+				v2 = {
+					x: bl[0] - tl[0]  + br[0] - tr[0],
+					y: bl[1] - tl[1]  + br[1] - tr[1]
+				};
+					
+			var area = 0.25 * Math.abs(v1.x * v2.y - v1.y * v2.x);
+			if (area >= patch) {
+				var mt = [
+						(tl[0] + tr[0])/2,
+						(tr[1] + tl[1])/2
+					],
+					mr = [
+						(br[0] + tr[0])/2,
+						(br[1] + tr[1])/2
+					],
+					mb = [
+						(br[0] + bl[0])/2,
+						(br[1] + bl[1])/2
+					],
+					ml = [
+						(bl[0] + tl[0])/2,
+						(bl[1] + tl[1])/2
+					],
+					mm = [
+						(tl[0] + br[0])/2,
+						(tl[1] + br[1])/2
+					];
+				divide(tl, mt, mm, ml); //tl
+				divide(mt, tr, mr, mm); //tr
+				divide(mm, mr, br, mb); //br
+				divide(ml, mm, mb, bl); //bl
+			} else {
+				counter++;
+				// Original corners, centered on a -1 to 1 coordinate system
+				var ic = {
+					tl: [tl[0] - x/2, tl[1] - y/2],
+					tr: [tr[0] - x/2, tr[1] - y/2],
+					br: [br[0] - x/2, br[1] - y/2],
+					bl: [bl[0] - x/2, bl[1] - y/2]
+				}
+				
+				// Calc our corners
+				var c = {
+					tl: calc.coord(ic.tl[0], ic.tl[1], 0),
+					tr: calc.coord(ic.tr[0], ic.tr[1], 0),
+					br: calc.coord(ic.br[0], ic.br[1], 0),
+					bl: calc.coord(ic.bl[0], ic.bl[1], 0)
+				};
+				
+				// Find the largest corner
+				var corners =['tl', 'tr', 'br', 'bl'],
+					area = {},
+					la, lan, lap,
+					len = corners.length,
+					i,
+					pa = 0; // temp previous area
+				
+				
+				//Loop all 4 corners
+				for (i = 0; i > len, corner = corners[i]; i++) {
+					prev = i - 1 < 0 ? corners[len - 1]: corners[i - 1];
+					next = i + 1 >= len ? corners[0]: corners[i + 1];
+					oppo = i + 2 >= len ? corners[i - 2]: corners[i + 2];
+					
+					// find the biggest corner (area of a triangle)
+					var x0 = c[corner].e(1),
+						y0 = c[corner].e(2),
+						x1 = c[next].e(1),
+						y1 = c[next].e(2),
+						x2 = c[prev].e(1),
+						y2 = c[prev].e(2);
+					
+					area[corner] = ((x1-x0)*(y2-y0)-(x2-x0)*(y1-y0))/2;
+					
+					if (area[corner] > pa) {
+						//console.log((area[corner] > pa), area[corner] + ' > ' + pa);
+						la = corner;
+						lap = prev;
+						lan = next;
+						pa = area[corner];
+					}
+				}
+				console.log(la, lap, lan);
+				
+				// correct for the TL being preferred
+				if (la == 'tl' && ic.tl[1] > 0) {
+					la = 'bl';
+					lap = 'tl';
+					lan = 'br';
+				}
+				
+				//console.log(la, counter, c, area);
+				var m = (new $.matrix.M3x3(
+							ic[la][0], ic[la][1], 1,
+							ic[lap][0], ic[lap][1], 1,
+							ic[lan][0], ic[lan][1], 1
+						)).inverse();
+				
+				// Solve the matrix
+				var solve = {
+					x: m.x(new $.matrix.V3(
+							c[la].e(1),
+							c[lap].e(1),
+							c[lan].e(1)
+						)),
+					y: m.x(new $.matrix.V3(
+							c[la].e(2),
+							c[lap].e(2),
+							c[lan].e(2)
+						))
+				};
+				
+				// Clone the original element
+				var $clone = $elem.clone();
+				
+				// Transform the element
+				$clone.transform({matrix: [
+					parseFloat(solve.x.e(1).toFixed(8)), parseFloat(solve.y.e(1).toFixed(8)),
+					parseFloat(solve.x.e(2).toFixed(8)), parseFloat(solve.y.e(2).toFixed(8)),
+					parseFloat(solve.x.e(3).toFixed(8)), parseFloat(solve.y.e(3).toFixed(8))
+				]});
+				
+				// Apply the correct clip
+				var nudge = 1.01;
+				$clone.css({
+					position: 'absolute',
+					top: 0, //x * i * 1.1 ,
+					left: 0,
+					overflow: 'hidden',
+					height: y + 'px',
+					width: x + 'px',
+					visibility: 'visible',
+					clip: 'rect(' + tl[1]/nudge + 'px, ' + br[0]*nudge + 'px, ' + br[1]*nudge + 'px, ' + tl[0]/nudge + 'px)'
+				}).addClass('patch');
+				frag.appendChild($clone[0]);
+			}
+		}
+	}
+</script>
+
