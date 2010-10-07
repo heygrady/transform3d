@@ -1,3 +1,14 @@
+
+/*!
+ * jQuery 3d Transform v@VERSION
+ * http://wiki.github.com/heygrady/transform3d/
+ *
+ * Copyright 2010, Grady Kuhnline
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ * 
+ * Date: 
+ */
 ///////////////////////////////////////////////////////
 // Transform 3d
 ///////////////////////////////////////////////////////
