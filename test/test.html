@@ -15,7 +15,7 @@
 			border: 1px solid salmon;
 		}
 		img.t {
-			-webkit-transform: perspective(400) rotateY(30deg) rotateX(30deg);
+			/*-webkit-transform: perspective(400) rotateY(30deg) rotateX(30deg);*/
 		}
 		p {
 			float: left;
@@ -31,20 +31,23 @@
 <p><img class="t" src="http://www.whydidigowrong.co.uk/wp-content/uploads/2007/03/help-my-dogs-as-fat-as-me.jpg" height="292" width="333" /></p>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.js"></script>
-<script src="../src/jquery.transform.js"></script>
-<script src="../src/jquery.transform.attributes.js"></script>
-<script src="../src/jquery.transform.animate.js"></script>
+<script src="../src/transform/src/jquery.transform.js"></script>
+<script src="../src/transform/src/jquery.transform.attributes.js"></script>
+<script src="../src/transform/src/jquery.transform.animate.js"></script>
+<script src="../src/transform/src/jquery.angle.js"></script>
+<script src="../src/transform/src/jquery.matrix.calculations.js"></script>
+<script src="../src/transform/src/jquery.matrix.functions.js"></script>
 <script src="../src/jquery.transform3d.js"></script>
 <script src="../src/jquery.transform3d.attributes.js"></script>
-<script src="../src/jquery.angle.js"></script>
-<script src="../src/jquery.matrix.js"></script>
-<script src="../src/jquery.matrix.calculations.js"></script>
-<script src="../src/jquery.matrix.functions.js"></script>
-<script src="../src/jquery.matrix.functions3d.js"></script>
+<script src="../src/jquery.transform3d.animate.js"></script>
+<script src="../src/jquery.matrix3d.js"></script>
+<script src="../src/jquery.matrix3d.calculations.js"></script>
+<script src="../src/jquery.matrix3d.functions.js"></script>
 
 <script>	
-	$('img:first').transform3d({perspective: 400, rotateY: '30deg', rotateX: '30deg'}, {quality: 7});
-	$('img:last').transform({rotate: 30, translate: [10, 10], origin: ['left', 'top']});
+	$('img:first').transform3d({perspective: 400, rotateY: '0deg', rotateX: '30deg'}, {nudge: 1.02, quality: 7})
+		.animate({rotateY: '60deg'}, 5000);
+	//$('img.t').transform({matrix: [1.014659, 0.153809, 0.0507, 0.854509]}, 5000);
 </script>
 </body>
 </html>

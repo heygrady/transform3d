@@ -25,6 +25,7 @@
 			}
 			
 			// animate needs sensible defaults for some props
+			//TODO: handle this with a $.cssDefaults property
 			switch (func) {
 				case 'scale': return [1, 1]; break;
 				case 'scale3d': return [1, 1, 1]; break;
@@ -45,5 +46,21 @@
 			}
 			return null;
 		}
+	});
+	
+	$.each($.transform3d.funcs, function(i, func) {
+		$.cssNumber[func] = true;
+		$.cssHooks[func] = {
+			set: function(elem, value) {
+				var transform3d = elem.transform3d || new $.transform3d(elem),
+					funcs = {};
+				funcs[func] = value;
+				transform3d.exec(funcs, {preserve: true});
+			},
+			get: function(elem, computed) {
+				var transform3d = elem.transform3d || new $.transform3d(elem);
+				return transform3d.getAttr(func);
+			}
+		};
 	});
 })(jQuery, this, this.document);

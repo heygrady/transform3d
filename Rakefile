@@ -20,7 +20,7 @@ transform_src_dir = File.join( transform_dir, "src" )
 transform_files = %w{transform transform.attributes transform.animate angle matrix.calculations matrix.functions}.map { |js| File.join( transform_src_dir, "jquery.#{js}.js" ) }
 transform_version_file = File.join( transform_dir, 'version.txt' )
 transform_version = ''
-transform3d_files = %w{transform3d transform3d.attributes matrix3d matrix3d.calculations matrix3d.functions}.map { |js| File.join( src_dir, "jquery.#{js}.js" ) }
+transform3d_files = %w{transform3d transform3d.attributes transform3d.animate matrix3d matrix3d.calculations matrix3d.functions}.map { |js| File.join( src_dir, "jquery.#{js}.js" ) }
 
 jq         = File.join( dist_dir, "jquery.transform3d-#{version}.js" )
 jq_min     = File.join( dist_dir, "jquery.transform3d-#{version}.min.js" )

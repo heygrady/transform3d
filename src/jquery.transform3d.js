@@ -31,6 +31,8 @@
 	
 	$.extend({
 		transform3d: function(elem) {
+			elem.transform3d = this;
+			
 			/**
 			 * The element we're working with
 			 * @var jQueryCollection
@@ -63,10 +65,14 @@
 			
 			this.wrapperClass = 'transform3d-wrapper';
 			this.patchClass = 'transform3d-patch';
+			this.patchWrapperClass = 'transform3d-patch-wrapper';
 			this.perspectiveClass = 'transform3d-perspective';
 		}
 	});
 	
+	// Allow jQuery to understand our properties
+	$.transform3d.funcs = ['matrix3d', 'perspective', 'reflectZ', 'rotate3d', 'rotateX', 'rotateY', 'rotateZ', 'scale3d', 'scaleX', 'scaleY', 'scaleZ', 'translate3d', 'translateX', 'translateY', 'translateZ'];
+		
 	/**
 	 * Create Transform as a jQuery plugin
 	 * @param Object funcs
@@ -303,14 +309,21 @@
 						parseFloat((b.br.e(2) * this.options.nudge).toFixed(6)) + 'px, ' +
 						parseFloat((b.tl.e(1) / this.options.nudge).toFixed(6)) + 'px)';
 				
-				// TODO: IE can't really use css clip, maybe use VML
+				// fix the clip for IE < 8
 				if ($.browser.msie && $.browser.version < 8) {
 					clip = clip.replace(',', '', 'g');
-				} 
-				$patch.css({
-					clip: clip,
-					'z-index': Math.round(c[la[0]].e(3))
-				});			
+				}
+				if ($.browser.msie && !$.support.csstransforms3d) {
+					$patch.children('.' + this.patchClass).css({
+						clip: clip,
+						'z-index': Math.round(c[la[0]].e(3))
+					});	
+				} else {
+					$patch.css({
+						clip: clip,
+						'z-index': Math.round(c[la[0]].e(3))
+					});	
+				}		
 			}
 			this.$wrapper.css('z-index', Math.round(calc.coord(0, 0, 0).e(3)));
 		},
@@ -346,7 +359,15 @@
 				count = quality * quality;
 			
 			// re-find all of the patches
-			this.$patches = this.$wrapper.children('.' + this.patchClass);
+			//this.$patches = this.$wrapper.children('.' + this.patchClass);
+			
+			if ($.browser.msie && !$.support.csstransforms3d) {
+				// IE requires wrapped patches
+				this.$patches = this.$wrapper.children('.' + this.patchWrapperClass);
+			} else {
+				this.$patches = this.$wrapper.children('.' + this.patchClass);
+			}
+			
 			if (this.$patches.length < count) {
 				var fragment = document.createDocumentFragment(),
 					$patch,
@@ -357,7 +378,6 @@
 						position: 'absolute',
 						top: 0,
 						left: 0,
-						//overflow: 'hidden',
 						height: this.$elem.height() + 'px',
 						width: this.$elem.width() + 'px'
 					}).addClass(this.patchClass);
@@ -368,9 +388,26 @@
 					i++;
 				} while(i < count)
 				
+				// wrap each patch in IE
+				if ($.browser.msie && !$.support.csstransforms3d) {
+					$(fragment).children().wrap('<div class="' + this.patchWrapperClass + '"/>');
+					
+					$(fragment).children('.' + this.patchWrapperClass).css({
+						position: 'absolute',
+						height: this.$elem.height() + 'px', //TODO: safeOuterHeight
+						width: this.$elem.width() + 'px' //TODO: safeOuterWidth
+					});
+				}
+				
 				// Add the fragment to the
 				this.$wrapper.append(fragment.cloneNode(true));
-				this.$patches = this.$wrapper.children('.' + this.patchClass);
+				
+				if ($.browser.msie && !$.support.csstransforms3d) {
+					// IE requires wrapped patches
+					this.$patches = this.$wrapper.children('.' + this.patchWrapperClass);
+				} else {
+					this.$patches = this.$wrapper.children('.' + this.patchClass);
+				}	
 			} else if (this.$patches.length > count) {
 				//we have too many
 				var i = this.$patches.length;

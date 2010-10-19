@@ -6,7 +6,7 @@
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  * 
- * Date: Wed Oct 6 00:38:58 2010 -0700
+ * Date: Wed Oct 6 23:57:04 2010 -0700
  */
 ///////////////////////////////////////////////////////
 // Transform
@@ -262,11 +262,11 @@
 				// IE requires the special transform Filter
 				
 				//TODO: Use Nearest Neighbor during animation FilterType=\'nearest neighbor\'
-				var filterType = ', FilterType=\'nearest neighbor\''; //bilinear
+				var filterType = '';//', FilterType=\'bilinear\''; //nearest neighbor
 				var style = this.$elem[0].style;
 				var matrixFilter = 'progid:DXImageTransform.Microsoft.Matrix(' +
 						'M11=' + a + ', M12=' + c + ', M21=' + b + ', M22=' + d +
-						', sizingMethod=\'auto expand\'' + filterType + ')';
+						', sizingMethod=\'auto expand\')';
 				var filter = style.filter || jQuery.curCSS( this.$elem[0], "filter" ) || "";
 				style.filter = rmatrix.test(filter) ? filter.replace(rmatrix, matrixFilter) : filter ? filter + ' ' + matrixFilter : matrixFilter;
 				
@@ -1505,14 +1505,14 @@
 	});
 })(jQuery, this, this.document);
 /*!
- * jQuery 3d Transform v0.5.0pre
+ * jQuery 3d Transform v0.5.1pre
  * http://wiki.github.com/heygrady/transform3d/
  *
  * Copyright 2010, Grady Kuhnline
  * Dual licensed under the MIT or GPL Version 2 licenses.
  * http://jquery.org/license
  * 
- * Date: Wed Oct 6 00:38:58 2010 -0700
+ * Date: Wed Oct 6 23:57:04 2010 -0700
  */
 ///////////////////////////////////////////////////////
 // Transform 3d
@@ -1536,6 +1536,8 @@
 	
 	$.extend({
 		transform3d: function(elem) {
+			elem.transform3d = this;
+			
 			/**
 			 * The element we're working with
 			 * @var jQueryCollection
@@ -1568,10 +1570,14 @@
 			
 			this.wrapperClass = 'transform3d-wrapper';
 			this.patchClass = 'transform3d-patch';
+			this.patchWrapperClass = 'transform3d-patch-wrapper';
 			this.perspectiveClass = 'transform3d-perspective';
 		}
 	});
 	
+	// Allow jQuery to understand our properties
+	$.transform3d.funcs = ['matrix3d', 'perspective', 'reflectZ', 'rotate3d', 'rotateX', 'rotateY', 'rotateZ', 'scale3d', 'scaleX', 'scaleY', 'scaleZ', 'translate3d', 'translateX', 'translateY', 'translateZ'];
+		
 	/**
 	 * Create Transform as a jQuery plugin
 	 * @param Object funcs
@@ -1808,14 +1814,21 @@
 						parseFloat((b.br.e(2) * this.options.nudge).toFixed(6)) + 'px, ' +
 						parseFloat((b.tl.e(1) / this.options.nudge).toFixed(6)) + 'px)';
 				
-				// TODO: IE can't really use css clip, maybe use VML
+				// fix the clip for IE < 8
 				if ($.browser.msie && $.browser.version < 8) {
 					clip = clip.replace(',', '', 'g');
-				} 
-				$patch.css({
-					clip: clip,
-					'z-index': Math.round(c[la[0]].e(3))
-				});			
+				}
+				if ($.browser.msie && !$.support.csstransforms3d) {
+					$patch.children('.' + this.patchClass).css({
+						clip: clip,
+						'z-index': Math.round(c[la[0]].e(3))
+					});	
+				} else {
+					$patch.css({
+						clip: clip,
+						'z-index': Math.round(c[la[0]].e(3))
+					});	
+				}		
 			}
 			this.$wrapper.css('z-index', Math.round(calc.coord(0, 0, 0).e(3)));
 		},
@@ -1851,7 +1864,15 @@
 				count = quality * quality;
 			
 			// re-find all of the patches
-			this.$patches = this.$wrapper.children('.' + this.patchClass);
+			//this.$patches = this.$wrapper.children('.' + this.patchClass);
+			
+			if ($.browser.msie && !$.support.csstransforms3d) {
+				// IE requires wrapped patches
+				this.$patches = this.$wrapper.children('.' + this.patchWrapperClass);
+			} else {
+				this.$patches = this.$wrapper.children('.' + this.patchClass);
+			}
+			
 			if (this.$patches.length < count) {
 				var fragment = document.createDocumentFragment(),
 					$patch,
@@ -1862,7 +1883,6 @@
 						position: 'absolute',
 						top: 0,
 						left: 0,
-						//overflow: 'hidden',
 						height: this.$elem.height() + 'px',
 						width: this.$elem.width() + 'px'
 					}).addClass(this.patchClass);
@@ -1873,9 +1893,26 @@
 					i++;
 				} while(i < count)
 				
+				// wrap each patch in IE
+				if ($.browser.msie && !$.support.csstransforms3d) {
+					$(fragment).children().wrap('<div class="' + this.patchWrapperClass + '"/>');
+					
+					$(fragment).children('.' + this.patchWrapperClass).css({
+						position: 'absolute',
+						height: this.$elem.height() + 'px', //TODO: safeOuterHeight
+						width: this.$elem.width() + 'px' //TODO: safeOuterWidth
+					});
+				}
+				
 				// Add the fragment to the
 				this.$wrapper.append(fragment.cloneNode(true));
-				this.$patches = this.$wrapper.children('.' + this.patchClass);
+				
+				if ($.browser.msie && !$.support.csstransforms3d) {
+					// IE requires wrapped patches
+					this.$patches = this.$wrapper.children('.' + this.patchWrapperClass);
+				} else {
+					this.$patches = this.$wrapper.children('.' + this.patchClass);
+				}	
 			} else if (this.$patches.length > count) {
 				//we have too many
 				var i = this.$patches.length;
@@ -2018,6 +2055,7 @@
 			}
 			
 			// animate needs sensible defaults for some props
+			//TODO: handle this with a $.cssDefaults property
 			switch (func) {
 				case 'scale': return [1, 1]; break;
 				case 'scale3d': return [1, 1, 1]; break;
@@ -2038,6 +2076,39 @@
 			}
 			return null;
 		}
+	});
+	
+	$.each($.transform3d.funcs, function(i, func) {
+		$.cssNumber[func] = true;
+		$.cssHooks[func] = {
+			set: function(elem, value) {
+				var transform3d = elem.transform3d || new $.transform3d(elem),
+					funcs = {};
+				funcs[func] = value;
+				transform3d.exec(funcs, {preserve: true});
+			},
+			get: function(elem, computed) {
+				var transform3d = elem.transform3d || new $.transform3d(elem);
+				return transform3d.getAttr(func);
+			}
+		};
+	});
+})(jQuery, this, this.document);
+///////////////////////////////////////////////////////
+// Animation
+///////////////////////////////////////////////////////
+(function($, window, document, undefined) {
+	/**
+	 * Step for animating tranformations
+	 */
+	$.each($.transform3d.funcs, function(i, func) {
+		$.fx.step[func] = function(fx) {
+			var transform3d = fx.elem.transform3d || new $.transform3d(fx.elem),
+				funcs = {};
+			
+			funcs[fx.prop] = fx.now;
+			transform3d.exec(funcs, {preserve: true});
+		};
 	});
 })(jQuery, this, this.document);
 ///////////////////////////////////////////////////////

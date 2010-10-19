@@ -33,10 +33,10 @@
 		}
 		
 		.ring > :nth-child(odd) .poster {
-			background-color: #995C7F;
+			background-color: green;/*#995C7F;*/
 		}
  		.ring > :nth-child(even) .poster {
-			background-color: #835A99;
+			background-color: red;/*#835A99;*/
 		}
  
 		.poster {
@@ -83,16 +83,7 @@
 </div> 
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.js"></script>
-<script src="../src/jquery.transform.js"></script>
-<script src="../src/jquery.transform.attributes.js"></script>
-<script src="../src/jquery.transform.animate.js"></script>
-<script src="../src/jquery.transform3d.js"></script>
-<script src="../src/jquery.transform3d.attributes.js"></script>
-<script src="../src/jquery.angle.js"></script>
-<script src="../src/jquery.matrix.js"></script>
-<script src="../src/jquery.matrix.calculations.js"></script>
-<script src="../src/jquery.matrix.functions.js"></script>
-<script src="../src/jquery.matrix.functions3d.js"></script>
+<script src="../dist/jquery.transform3d.js"></script>
 
 <script>
 	var POSTERS_PER_ROW = 12;
@@ -112,7 +103,7 @@
 			
 			// compute and assign the transform for this poster
 			$poster.transform3d({
-				perspective: 800,
+				perspective: 800, // TODO: this should be on the stage
 				rotateY: (posterAngle * i),
 				translateZ: RING_RADIUS
 			}, {
@@ -130,7 +121,6 @@
  
 	// call init once the document is fully loaded
 	init();
-	//window.addEventListener('load', init, false);
 	</script>
 </body>
 </html>
